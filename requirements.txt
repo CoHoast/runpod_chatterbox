@@ -4,7 +4,7 @@ librosa
 resemble-perth
 huggingface_hub 
 safetensors
-transformers==4.40.0
+transformers==4.44.0
 diffusers 
 torchaudio 
 torchvision 
