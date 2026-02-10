@@ -1,8 +1,15 @@
 import runpod
+import torch
 import torchaudio 
 import os
 import tempfile
 import base64
+
+# Fix attention implementation issue
+torch.backends.cuda.enable_flash_sdp(False)
+torch.backends.cuda.enable_mem_efficient_sdp(False)
+torch.backends.cuda.enable_math_sdp(True)
+
 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 
 model = None
