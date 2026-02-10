@@ -34,11 +34,28 @@ def handler(event):
         
         exaggeration = float(input_data.get('exaggeration', 0.5))
         cfg_weight = float(input_data.get('cfg_weight', 0.5))
+        audio_prompt_base64 = input_data.get('audio_prompt_base64')
+        
+        # Handle voice cloning
+        audio_prompt_path = None
+        if audio_prompt_base64:
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp:
+                tmp.write(base64.b64decode(audio_prompt_base64))
+                audio_prompt_path = tmp.name
+            print("Using voice clone from uploaded audio")
         
         print(f"Generating: {text[:50]}...")
-        audio_tensor = model.generate(text, exaggeration=exaggeration, cfg_weight=cfg_weight)
-        audio_base64 = audio_tensor_to_base64(audio_tensor, model.sr)
+        audio_tensor = model.generate(
+            text, 
+            audio_prompt_path=audio_prompt_path,
+            exaggeration=exaggeration, 
+            cfg_weight=cfg_weight
+        )
         
+        if audio_prompt_path and os.path.exists(audio_prompt_path):
+            os.unlink(audio_prompt_path)
+        
+        audio_base64 = audio_tensor_to_base64(audio_tensor, model.sr)
         return {"status": "success", "audio_base64": audio_base64, "sample_rate": model.sr}
     except Exception as e:
         return {"error": str(e)}
